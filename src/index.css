@@ -1,0 +1,51 @@
+@import "../styles/globals.css";
+
+@layer base {
+  :root {
+    font-family: "VT323", monospace;
+  }
+
+  body {
+    @apply min-h-screen m-0 bg-[#d9dbe8] text-[#1a1a1a];
+  }
+}
+
+.aim-window {
+  box-shadow: inset 0 0 0 2px #1a1a1a, 4px 4px 0 0 #1a1a1a;
+}
+
+.aim-panel {
+  border: 2px solid #1a1a1a;
+  background: #f6f6fb;
+}
+
+.aim-titlebar {
+  background: linear-gradient(180deg, #f7c244 0%, #e5a90e 100%);
+  border-bottom: 2px solid #1a1a1a;
+}
+
+.aim-scroll {
+  scrollbar-color: #8a8ea6 #e6e8f3;
+  scrollbar-width: thin;
+}
+
+.aim-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+.aim-scroll::-webkit-scrollbar-track {
+  background: #e6e8f3;
+}
+
+.aim-scroll::-webkit-scrollbar-thumb {
+  background: #8a8ea6;
+  border: 2px solid #e6e8f3;
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+  }
+}
