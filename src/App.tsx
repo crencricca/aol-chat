@@ -3,6 +3,8 @@ import * as React from "react";
 import { messages, type Message } from "./data/messages";
 import buddies from "./data/buddies";
 
+const ME = 'catie_1999'
+
 export function App() {
   const getMessagesForUser = (username: string): Message[] => {
     return messages[username] ?? [];
@@ -10,9 +12,42 @@ export function App() {
 
   const fallbackBuddy = { id: "moviebuff42", name: "MovieBuff42", status: "Away - BRB", online: true };
   const [currentBuddies] = React.useState(buddies.length ? buddies : [fallbackBuddy]);
-  const [currentChat] = React.useState<Message[]>(getMessagesForUser(currentBuddies[0]?.id ?? fallbackBuddy.id));
+  const [activeBuddy, setActiveBuddy] = React.useState(currentBuddies[0]! ?? fallbackBuddy);
+  const [currentChat, setCurrentChat] = React.useState<Message[]>(getMessagesForUser(currentBuddies[0]?.id ?? fallbackBuddy.id));
+  const [currentMessage, setCurrentMessage] = React.useState('');
+  const chatScrollRef = React.useRef<HTMLDivElement | null>(null);
 
-  const activeBuddy = currentBuddies[0] ?? fallbackBuddy;
+  React.useEffect(() => {
+    if (!chatScrollRef.current) {
+      return;
+    }
+    chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+  }, [currentChat.length, activeBuddy.id]);
+
+  const handleUpdateMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentMessage(e.target.value);
+  }
+
+  const sendMessage = () => {
+    const newMessage = {
+      id: currentChat.length + 1,
+      from: ME,
+      text: currentMessage,
+      time: new Date(Date.now()).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+    };
+    const newChat = [...currentChat, newMessage];
+    setCurrentChat(newChat);
+    setCurrentMessage('');
+  }
+
+  const handleUpdateBuddy = (id: string) => {
+    setActiveBuddy(currentBuddies.find(buddy => buddy.id === id) ?? fallbackBuddy);
+    setCurrentChat(getMessagesForUser(id));
+    setCurrentMessage('');
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -36,6 +71,7 @@ export function App() {
                     key={buddy.id}
                     className={`flex items-start gap-2 px-2 py-1 border-2 ${isActive ? "border-[#1a1a1a] bg-[#fff3cf]" : "border-transparent"
                       }`}
+                    onClick={() => handleUpdateBuddy(buddy.id)}
                   >
                     <span
                       className={`mt-1 h-2 w-2 rounded-full ${buddy.online ? "bg-[#1fa64a]" : "bg-[#9a9a9a]"
@@ -54,12 +90,12 @@ export function App() {
             </div>
           </aside>
           <section className="flex flex-col gap-3">
-            <div className="aim-panel flex-1 p-3 min-h-[360px]">
+            <div className="aim-panel flex-1 p-3 h-[420px] overflow-hidden">
               <div className="flex items-center justify-between border-b-2 border-[#1a1a1a] pb-2">
                 <div className="text-lg">Chat with {activeBuddy.name}</div>
                 <div className="text-xs text-[#4a4a4a]">Status: {activeBuddy.status}</div>
               </div>
-              <div className="aim-scroll mt-3 max-h-[360px] overflow-y-auto space-y-3 pr-2">
+              <div ref={chatScrollRef} className="aim-scroll mt-3 h-[320px] overflow-y-auto space-y-3 pr-2">
                 {currentChat.map(message => {
                   const isMe = message.from === "catie_1999";
                   return (
@@ -86,8 +122,10 @@ export function App() {
                 <input
                   className="flex-1 border-2 border-[#1a1a1a] bg-white px-2 py-1 text-base focus:outline-none"
                   placeholder="Type your message..."
+                  value={currentMessage}
+                  onChange={handleUpdateMessage}
                 />
-                <button className="border-2 border-[#1a1a1a] bg-[#ffd36a] px-4 py-1 text-base">
+                <button className="border-2 border-[#1a1a1a] bg-[#ffd36a] px-4 py-1 text-base" onClick={sendMessage}>
                   Send
                 </button>
               </div>
